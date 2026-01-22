@@ -10,7 +10,7 @@ import gymnasium as gym
 ##
 
 gym.register(
-    id="Booster-K1-MJ_Dance_004-v0",
+    id="Booster-T1-MJ_Dance_004-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
