@@ -45,7 +45,7 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 ##
 # Pre-defined configs
 ##
-from booster_train.assets.robots.booster import BOOSTER_K1_CFG
+from booster_train.assets.robots.booster import BOOSTER_T1_CFG
 from booster_train.tasks.manager_based.beyond_mimic.mdp.commands import MotionLoader
 
 
@@ -64,7 +64,7 @@ class ReplayMotionsSceneCfg(InteractiveSceneCfg):
     )
 
     # articulation
-    robot: ArticulationCfg = BOOSTER_K1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+    robot: ArticulationCfg = BOOSTER_T1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
 
 def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
@@ -95,15 +95,16 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     else:
         raise ValueError("Either --motion or --registry_name must be provided.")
 
-    # Load npz file to get body names and determine body_indexes
-    # For K1, we typically use Trunk as anchor body (index 0)
-    # body_indexes should be a list of indices corresponding to the bodies we want to use
-    # For replay, we only need the anchor body (Trunk), which is typically at index 0
-    body_indexes = [0]  # Default to index 0 for anchor body (Trunk)
-    
+    # Load motion.
+    # MotionLoader API expects body/joint *names* (not indexes).
+    # For replay, we only need the anchor body (Trunk) for root pose,
+    # but we load all joints so we can drive the full articulation.
     motion = MotionLoader(
         motion_file,
-        body_indexes,
+        track_body_names=["Trunk"],
+        track_joint_names=robot.joint_names,
+        default_motion_body_names=robot.body_names,
+        default_motion_joint_names=robot.joint_names,
         tail_len=0,
         device=str(sim.device),
     )
